@@ -14,6 +14,8 @@ def main():
     print("Starting Asteroids!")
     print(f"Screen width: {SCREEN_WIDTH}")
     print(f"Screen height: {SCREEN_HEIGHT}")
+    
+    font = pygame.font.SysFont(None, 36)
 
     #Groups
     updateables = pygame.sprite.Group()
@@ -29,20 +31,23 @@ def main():
     clock = pygame.time.Clock()
     dt = 0 # Delta time
 
+    # Start scoring
+    score = 0
+
     # Make GUI
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-    # Spawn player in middle of screen
     player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
     field = AsteroidField()
 
+
     # Game loop
-    running = True
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
         screen.fill("black")
+        score_display = font.render(f"Score: {score}", True, "yellow")
+        screen.blit(score_display, (10, 10))  # Top-left corner at x=10, y=10
 
         # Manage groups
         updateables.update(dt)
@@ -51,10 +56,11 @@ def main():
         for asteroid in asteroids:
             if player.collision_check(asteroid):
                 print("Game over!")
+                print(f"Final score: {score}")
                 exit()
             for shot in shots:
                 if shot.collision_check(asteroid):
-                    print("nice one!")
+                    score += 100
                     asteroid.split()
                     shot.kill()
         pygame.display.flip()
