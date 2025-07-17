@@ -2,6 +2,11 @@
 # the open-source pygame library
 # throughout this file
 import pygame
+from circleshape import *
+from player import *
+from asteroid import *
+from shot import *
+from asteroidfield import *
 from constants import *
 
 def main():
@@ -10,15 +15,49 @@ def main():
     print(f"Screen width: {SCREEN_WIDTH}")
     print(f"Screen height: {SCREEN_HEIGHT}")
 
+    #Groups
+    updateables = pygame.sprite.Group()
+    drawables = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
+    Player.containers = (updateables, drawables)
+    Asteroid.containers = (asteroids, updateables, drawables)
+    AsteroidField.containers = updateables
+    Shot.containers = (shots, updateables, drawables)
+
+    # Make clock
+    clock = pygame.time.Clock()
+    dt = 0 # Delta time
+
+    # Make GUI
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    # Spawn player in middle of screen
+    player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+    field = AsteroidField()
+
+    # Game loop
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
         screen.fill("black")
+
+        # Manage groups
+        updateables.update(dt)
+        for drawable in drawables:
+            drawable.draw(screen)
+        for asteroid in asteroids:
+            if player.collision_check(asteroid):
+                print("Game over!")
+                exit()
+            for shot in shots:
+                if shot.collision_check(asteroid):
+                    asteroid.kill()
+                    shot.kill()
         pygame.display.flip()
+        dt = clock.tick(60)/1000
 
 if __name__ == "__main__":
     main()
